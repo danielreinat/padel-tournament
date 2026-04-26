@@ -26,5 +26,12 @@ services:
     volumes:
       - ./services/media/mediamtx.yml:/mediamtx.yml
 
+  optimizer:
+    build: ./services/optimizer
+    container_name: padel-optimizer
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
 volumes:
   pgdata:

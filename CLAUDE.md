@@ -116,6 +116,11 @@ apps/web/src/app/torneo/[slug]/inscripcion/page.tsx →  /torneo/mi-torneo/inscr
 | `torneo/[slug]/page.tsx` | `/torneo/xxx` | Detalle de un torneo |
 | `torneo/[slug]/inscripcion/page.tsx` | `/torneo/xxx/inscripcion` | Formulario de inscripcion |
 | `torneo/[slug]/estado/page.tsx` | `/torneo/xxx/estado` | Consultar estado inscripcion |
+| `torneo/[slug]/grupos/page.tsx` | `/torneo/xxx/grupos` | Fase de grupos con clasificaciones |
+| `torneo/[slug]/cuadro/page.tsx` | `/torneo/xxx/cuadro` | Cuadro eliminatorio visual |
+| `torneo/[slug]/partidos/page.tsx` | `/torneo/xxx/partidos` | Lista de partidos con resultados |
+| `torneo/[slug]/directo/page.tsx` | `/torneo/xxx/directo` | Streams en vivo disponibles |
+| `torneo/[slug]/directo/[key]/page.tsx` | `/torneo/xxx/directo/abc` | Player HLS de un stream |
 
 **Panel admin (`apps/admin/src/app/`):**
 | Archivo | URL | Que hace |
@@ -124,7 +129,19 @@ apps/web/src/app/torneo/[slug]/inscripcion/page.tsx →  /torneo/mi-torneo/inscr
 | `login/page.tsx` | `/login` | Login de admin |
 | `dashboard/page.tsx` | `/dashboard` | Lista de torneos |
 | `torneos/nuevo/page.tsx` | `/torneos/nuevo` | Crear torneo |
-| `torneos/[id]/page.tsx` | `/torneos/xxx` | Gestionar torneo (4 tabs) |
+| `torneos/[id]/page.tsx` | `/torneos/xxx` | Gestionar torneo (8 tabs) |
+
+**Tabs del panel admin (`apps/admin/src/app/torneos/[id]/tabs/`):**
+| Archivo | Tab | Que hace |
+|---------|-----|----------|
+| `general.tsx` | General | Editar info del torneo + cambiar estado |
+| `categorias.tsx` | Categorias | Gestionar categorias del torneo |
+| `pistas.tsx` | Pistas | Gestionar pistas (con flag streaming) |
+| `inscripciones.tsx` | Inscripciones | Confirmar/cancelar inscripciones |
+| `grupos.tsx` | Grupos | Ver grupos y generar con OR-Tools |
+| `resultados.tsx` | Resultados | Meter resultados de partidos |
+| `bracket.tsx` | Bracket | Ver/generar cuadro eliminatorio |
+| `streaming.tsx` | Streaming | Gestionar streams RTMP/HLS |
 
 ## Como usar los datos de la API
 
@@ -150,6 +167,10 @@ mutation.mutate({ name: "Mi Torneo", ... });
 - `trpc.tournament.bySlug` — Un torneo por su slug
 - `trpc.registration.register` — Inscribir un equipo
 - `trpc.registration.checkStatus` — Consultar inscripcion por email
+- `trpc.group.byTournament` — Grupos con clasificaciones de un torneo
+- `trpc.match.byTournament` — Todos los partidos de un torneo
+- `trpc.match.byId` — Detalle de un partido
+- `trpc.stream.byTournament` — Streams activos de un torneo
 
 **Admin (necesitan estar logueado):**
 - `trpc.auth.login` / `trpc.auth.me`
@@ -158,6 +179,11 @@ mutation.mutate({ name: "Mi Torneo", ... });
 - `trpc.tournament.addCategory` / `trpc.tournament.deleteCategory`
 - `trpc.tournament.addCourt` / `trpc.tournament.deleteCourt`
 - `trpc.registration.listByTournament` / `trpc.registration.confirm` / `trpc.registration.cancel`
+- `trpc.group.generate` — Generar grupos con OR-Tools
+- `trpc.match.updateResult` — Meter resultado de un partido (sets)
+- `trpc.match.setLive` — Marcar partido como EN DIRECTO
+- `trpc.match.generateBracket` — Generar cuadro eliminatorio
+- `trpc.stream.create` / `trpc.stream.updateStatus` / `trpc.stream.delete` / `trpc.stream.adminList`
 
 Si necesitas un endpoint que no existe, **no lo crees**. Dile a Daniel que lo necesitas.
 

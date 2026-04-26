@@ -196,6 +196,12 @@ export default function TorneoPage() {
           >
             Ver Partidos
           </a>
+          <a
+            href={`/torneo/${slug}/directo`}
+            className="rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100"
+          >
+            En Directo
+          </a>
         </div>
       )}
     </div>

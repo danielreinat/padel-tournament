@@ -8,12 +8,20 @@ import { GeneralTab } from "./tabs/general";
 import { CategoriasTab } from "./tabs/categorias";
 import { PistasTab } from "./tabs/pistas";
 import { InscripcionesTab } from "./tabs/inscripciones";
+import { GruposTab } from "./tabs/grupos";
+import { ResultadosTab } from "./tabs/resultados";
+import { BracketTab } from "./tabs/bracket";
+import { StreamingTab } from "./tabs/streaming";
 
 const TABS = [
   { id: "general", label: "General" },
   { id: "categorias", label: "Categorias" },
   { id: "pistas", label: "Pistas" },
   { id: "inscripciones", label: "Inscripciones" },
+  { id: "grupos", label: "Grupos" },
+  { id: "resultados", label: "Resultados" },
+  { id: "bracket", label: "Bracket" },
+  { id: "streaming", label: "Streaming" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -115,6 +123,18 @@ export default function TorneoDetailPage() {
         )}
         {activeTab === "inscripciones" && (
           <InscripcionesTab tournamentId={tournament.id} />
+        )}
+        {activeTab === "grupos" && (
+          <GruposTab tournamentId={tournament.id} tournamentStatus={tournament.status} />
+        )}
+        {activeTab === "resultados" && (
+          <ResultadosTab tournamentId={tournament.id} />
+        )}
+        {activeTab === "bracket" && (
+          <BracketTab tournamentId={tournament.id} />
+        )}
+        {activeTab === "streaming" && (
+          <StreamingTab tournamentId={tournament.id} />
         )}
       </main>
     </div>
