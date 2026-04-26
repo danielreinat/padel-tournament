@@ -1,0 +1,25 @@
+{
+  "name": "padel-tournament",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "db:migrate": "npm run migrate --workspace=@padel/db",
+    "db:studio": "npm run studio --workspace=@padel/db",
+    "db:generate": "npm run generate --workspace=@padel/db"
+  },
+  "devDependencies": {
+    "turbo": "^2.4.0",
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "npm@10.2.4"
+}

@@ -1,0 +1,26 @@
+# MediaMTX configuration for padel tournament streaming
+# OBS publishes RTMP to :1935, browsers consume HLS from :8888
+
+logLevel: info
+
+# RTMP server (input from OBS)
+rtmp: yes
+rtmpAddress: :1935
+
+# HLS server (output to browsers)
+hls: yes
+hlsAddress: :8888
+hlsAlwaysRemux: yes
+hlsSegmentCount: 3
+hlsSegmentDuration: 1s
+
+# RTSP (optional, for other consumers)
+rtsp: yes
+rtspAddress: :8554
+
+# WebRTC (disabled - not needed)
+webrtc: no
+
+# Paths - accept any stream key
+paths:
+  all:
