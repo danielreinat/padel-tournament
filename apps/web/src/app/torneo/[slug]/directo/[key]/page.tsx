@@ -18,14 +18,12 @@ export default function StreamPlayerPage() {
       const video = videoRef.current;
       if (!video) return;
 
-      // Check if native HLS is supported (Safari)
       if (video.canPlayType("application/vnd.apple.mpegurl")) {
         video.src = hlsUrl;
         video.play().catch(() => {});
         return;
       }
 
-      // Use hls.js for other browsers
       try {
         const Hls = (await import("hls.js")).default;
         if (Hls.isSupported()) {
@@ -52,12 +50,12 @@ export default function StreamPlayerPage() {
     <div className="mx-auto max-w-4xl">
       <a
         href={`/torneo/${slug}/directo`}
-        className="mb-4 inline-block text-sm text-gray-500 hover:text-gray-700"
+        className="mb-6 inline-block text-sm font-medium text-white/50 transition hover:text-white"
       >
         ← Volver a directos
       </a>
 
-      <div className="overflow-hidden rounded-lg bg-black">
+      <div className="overflow-hidden rounded-[22px] bg-black shadow-2xl">
         <video
           ref={videoRef}
           controls
@@ -70,9 +68,9 @@ export default function StreamPlayerPage() {
         </video>
       </div>
 
-      <div className="mt-4 flex items-center gap-3">
-        <span className="rounded-full bg-red-600 px-3 py-1 text-sm font-bold text-white">
-          EN DIRECTO
+      <div className="mt-5 flex items-center gap-3">
+        <span className="rounded-full bg-red-500 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-white">
+          En directo
         </span>
       </div>
     </div>

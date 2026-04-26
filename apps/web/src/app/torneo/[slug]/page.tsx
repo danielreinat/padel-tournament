@@ -14,17 +14,17 @@ export default function TorneoPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <p className="text-gray-500">Cargando torneo...</p>
+      <div className="flex items-center justify-center py-32">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-white/30 border-t-white" />
       </div>
     );
   }
 
   if (!tournament) {
     return (
-      <div className="py-20 text-center">
-        <h1 className="text-2xl font-bold text-gray-800">Torneo no encontrado</h1>
-        <a href="/" className="mt-4 inline-block text-green-600 hover:text-green-700">
+      <div className="py-32 text-center">
+        <h1 className="text-3xl font-black uppercase text-white">Torneo no encontrado</h1>
+        <a href="/" className="mt-6 inline-block text-cyan-light hover:text-white">
           ← Volver al inicio
         </a>
       </div>
@@ -36,25 +36,27 @@ export default function TorneoPage() {
   const isFinished = tournament.status === "FINISHED";
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-4xl">
       {/* Breadcrumb */}
-      <a href="/" className="mb-6 inline-block text-sm text-gray-500 hover:text-gray-700">
+      <a href="/" className="mb-8 inline-block text-sm font-medium text-white/50 transition hover:text-white">
         ← Todos los torneos
       </a>
 
       {/* Header */}
-      <div className="mb-8">
-        <div className="mb-2 flex items-center gap-3">
-          <h1 className="text-3xl font-bold">{tournament.name}</h1>
+      <div className="mb-10">
+        <div className="mb-3 flex flex-wrap items-center gap-3">
+          <h1 className="text-4xl font-black uppercase tracking-tight md:text-5xl">
+            {tournament.name}
+          </h1>
           <span
-            className={`rounded-full px-3 py-1 text-sm font-medium ${
+            className={`rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wide ${
               isOpen
-                ? "bg-green-100 text-green-700"
+                ? "bg-cyan/20 text-cyan-light"
                 : isInProgress
-                  ? "bg-yellow-100 text-yellow-700"
+                  ? "bg-yellow-400/20 text-yellow-300"
                   : isFinished
-                    ? "bg-blue-100 text-blue-700"
-                    : "bg-gray-100 text-gray-600"
+                    ? "bg-white/20 text-white/70"
+                    : "bg-white/10 text-white/50"
             }`}
           >
             {isOpen
@@ -67,15 +69,15 @@ export default function TorneoPage() {
           </span>
         </div>
         {tournament.description && (
-          <p className="mt-2 text-gray-600">{tournament.description}</p>
+          <p className="mt-3 text-lg text-white/70">{tournament.description}</p>
         )}
       </div>
 
       {/* Info cards */}
-      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-lg border bg-white p-4">
-          <p className="text-sm text-gray-500">Fecha</p>
-          <p className="font-medium">
+      <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="rounded-[18px] bg-white/10 p-5 backdrop-blur-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-white/40">Fecha</p>
+          <p className="mt-1 font-bold text-white">
             {new Date(tournament.dateStart).toLocaleDateString("es-ES", {
               day: "numeric",
               month: "long",
@@ -95,24 +97,24 @@ export default function TorneoPage() {
         </div>
 
         {tournament.location && (
-          <div className="rounded-lg border bg-white p-4">
-            <p className="text-sm text-gray-500">Ubicacion</p>
-            <p className="font-medium">{tournament.location}</p>
+          <div className="rounded-[18px] bg-white/10 p-5 backdrop-blur-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-white/40">Ubicacion</p>
+            <p className="mt-1 font-bold text-white">{tournament.location}</p>
           </div>
         )}
 
-        <div className="rounded-lg border bg-white p-4">
-          <p className="text-sm text-gray-500">Equipos inscritos</p>
-          <p className="font-medium">
+        <div className="rounded-[18px] bg-white/10 p-5 backdrop-blur-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-white/40">Equipos inscritos</p>
+          <p className="mt-1 font-bold text-white">
             {tournament._count.registrations}
             {tournament.maxTeams && ` / ${tournament.maxTeams}`}
           </p>
         </div>
 
         {tournament.registrationDeadline && (
-          <div className="rounded-lg border bg-white p-4">
-            <p className="text-sm text-gray-500">Limite de inscripcion</p>
-            <p className="font-medium">
+          <div className="rounded-[18px] bg-white/10 p-5 backdrop-blur-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-white/40">Limite inscripcion</p>
+            <p className="mt-1 font-bold text-white">
               {new Date(tournament.registrationDeadline).toLocaleDateString("es-ES", {
                 day: "numeric",
                 month: "long",
@@ -123,16 +125,16 @@ export default function TorneoPage() {
           </div>
         )}
 
-        <div className="rounded-lg border bg-white p-4">
-          <p className="text-sm text-gray-500">Formato</p>
-          <p className="font-medium">
-            {tournament.numGroups} grupos de {tournament.teamsPerGroup} · Top {tournament.teamsAdvancingPerGroup} clasifican
+        <div className="rounded-[18px] bg-white/10 p-5 backdrop-blur-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-white/40">Formato</p>
+          <p className="mt-1 font-bold text-white">
+            {tournament.numGroups} grupos de {tournament.teamsPerGroup} · Top {tournament.teamsAdvancingPerGroup}
           </p>
         </div>
 
-        <div className="rounded-lg border bg-white p-4">
-          <p className="text-sm text-gray-500">Pistas</p>
-          <p className="font-medium">
+        <div className="rounded-[18px] bg-white/10 p-5 backdrop-blur-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-white/40">Pistas</p>
+          <p className="mt-1 font-bold text-white">
             {tournament.courts.length > 0
               ? tournament.courts.map((c) => c.name).join(", ")
               : `${tournament.numCourts} pistas`}
@@ -142,13 +144,13 @@ export default function TorneoPage() {
 
       {/* Categorias */}
       {tournament.categories.length > 0 && (
-        <section className="mb-8">
-          <h2 className="mb-3 text-lg font-semibold">Categorias</h2>
-          <div className="flex flex-wrap gap-2">
+        <section className="mb-10">
+          <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-white/50">Categorias</h2>
+          <div className="flex flex-wrap gap-3">
             {tournament.categories.map((cat) => (
               <span
                 key={cat.id}
-                className="rounded-full border border-green-200 bg-green-50 px-4 py-2 text-sm font-medium text-green-700"
+                className="rounded-full bg-white/10 px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-white backdrop-blur-sm"
               >
                 {cat.name} — {cat.level}
               </span>
@@ -157,50 +159,62 @@ export default function TorneoPage() {
         </section>
       )}
 
-      {/* Action buttons */}
+      {/* CTA buttons */}
       <div className="flex flex-wrap gap-4">
         {isOpen && (
           <a
             href={`/torneo/${slug}/inscripcion`}
-            className="rounded-lg bg-green-600 px-8 py-3 text-lg font-semibold text-white transition hover:bg-green-700"
+            className="rounded-full bg-black px-10 py-4 text-lg font-bold uppercase tracking-wide text-white transition hover:bg-cyan"
           >
             Inscribirse
           </a>
         )}
         <a
           href={`/torneo/${slug}/estado`}
-          className="rounded-lg border border-gray-300 px-8 py-3 text-lg font-medium text-gray-700 transition hover:bg-gray-50"
+          className="rounded-full border-2 border-white/30 px-10 py-4 text-lg font-bold uppercase tracking-wide text-white transition hover:border-white hover:bg-white/10"
         >
-          Consultar mi inscripcion
+          Mi inscripcion
         </a>
       </div>
 
-      {/* Links a secciones futuras */}
+      {/* Section links */}
       {(isInProgress || isFinished) && (
-        <div className="mt-8 flex flex-wrap gap-3">
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <a
             href={`/torneo/${slug}/grupos`}
-            className="rounded-md border px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="group rounded-[18px] bg-white/10 p-6 text-center backdrop-blur-sm transition hover:bg-white/20"
           >
-            Ver Grupos
+            <p className="text-3xl">📊</p>
+            <p className="mt-2 font-bold uppercase tracking-wide text-white group-hover:text-cyan-light">
+              Grupos
+            </p>
           </a>
           <a
             href={`/torneo/${slug}/cuadro`}
-            className="rounded-md border px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="group rounded-[18px] bg-white/10 p-6 text-center backdrop-blur-sm transition hover:bg-white/20"
           >
-            Ver Cuadro
+            <p className="text-3xl">🏆</p>
+            <p className="mt-2 font-bold uppercase tracking-wide text-white group-hover:text-cyan-light">
+              Cuadro
+            </p>
           </a>
           <a
             href={`/torneo/${slug}/partidos`}
-            className="rounded-md border px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="group rounded-[18px] bg-white/10 p-6 text-center backdrop-blur-sm transition hover:bg-white/20"
           >
-            Ver Partidos
+            <p className="text-3xl">🎾</p>
+            <p className="mt-2 font-bold uppercase tracking-wide text-white group-hover:text-cyan-light">
+              Partidos
+            </p>
           </a>
           <a
             href={`/torneo/${slug}/directo`}
-            className="rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100"
+            className="group rounded-[18px] bg-red-500/20 p-6 text-center backdrop-blur-sm transition hover:bg-red-500/30"
           >
-            En Directo
+            <p className="text-3xl">📺</p>
+            <p className="mt-2 font-bold uppercase tracking-wide text-white group-hover:text-red-300">
+              En Directo
+            </p>
           </a>
         </div>
       )}

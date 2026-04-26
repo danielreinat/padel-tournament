@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#15803d",
+  themeColor: "#00243a",
 };
 
 export default function RootLayout({
@@ -29,17 +29,23 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className="flex min-h-screen flex-col bg-gray-50 text-gray-900 antialiased">
+      <body className="min-h-screen text-white antialiased" style={{
+        background: "linear-gradient(180deg, rgba(0,36,58,0.95) 0%, #0693e3 16%, #8ed1fc 58%, #ffffff 100%)",
+        backgroundAttachment: "fixed",
+      }}>
         <TRPCProvider>
-          <header className="border-b bg-white">
-            <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-              <a href="/" className="text-xl font-bold text-green-700">
+          <header className="border-b border-white/10">
+            <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5">
+              <a href="/" className="text-2xl font-black uppercase tracking-tight text-white">
                 Torneos Padel
               </a>
+              <nav className="hidden items-center gap-6 text-sm font-semibold uppercase tracking-wide text-white/80 sm:flex">
+                <a href="/" className="transition hover:text-white">Inicio</a>
+              </nav>
             </div>
           </header>
-          <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8">{children}</main>
-          <footer className="border-t bg-white py-6 text-center text-sm text-gray-400">
+          <main className="mx-auto w-full max-w-7xl px-4 py-8">{children}</main>
+          <footer className="mt-auto border-t border-black/5 bg-white py-8 text-center text-sm text-gray-400">
             Torneos de Padel
           </footer>
         </TRPCProvider>

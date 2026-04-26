@@ -14,7 +14,11 @@ export default function DirectoPage() {
   );
 
   if (isLoading || !tournament) {
-    return <p className="py-20 text-center text-gray-500">Cargando...</p>;
+    return (
+      <div className="flex items-center justify-center py-32">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-white/30 border-t-white" />
+      </div>
+    );
   }
 
   const liveStreams = streams?.filter((s) => s.status === "LIVE") || [];
@@ -22,15 +26,15 @@ export default function DirectoPage() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <a href={`/torneo/${slug}`} className="mb-6 inline-block text-sm text-gray-500 hover:text-gray-700">
+      <a href={`/torneo/${slug}`} className="mb-8 inline-block text-sm font-medium text-white/50 transition hover:text-white">
         ← {tournament.name}
       </a>
-      <h1 className="mb-8 text-2xl font-bold">En Directo</h1>
+      <h1 className="mb-10 text-3xl font-black uppercase tracking-tight md:text-4xl">En Directo</h1>
 
       {liveStreams.length === 0 && inactiveStreams.length === 0 ? (
-        <div className="rounded-lg border-2 border-dashed border-gray-300 py-20 text-center">
-          <p className="text-lg text-gray-500">No hay retransmisiones en este momento.</p>
-          <p className="mt-2 text-sm text-gray-400">Vuelve mas tarde para ver los partidos en directo.</p>
+        <div className="rounded-[22px] border-2 border-dashed border-white/20 py-20 text-center">
+          <p className="text-lg text-white/60">No hay retransmisiones en este momento.</p>
+          <p className="mt-2 text-sm text-white/30">Vuelve mas tarde para ver los partidos en directo.</p>
         </div>
       ) : (
         <div className="grid gap-6 lg:grid-cols-2">
@@ -38,22 +42,22 @@ export default function DirectoPage() {
             <a
               key={stream.id}
               href={`/torneo/${slug}/directo/${stream.streamKey}`}
-              className="group rounded-lg border bg-white shadow-sm transition hover:shadow-md"
+              className="group overflow-hidden rounded-[22px] bg-white/10 backdrop-blur-sm transition hover:bg-white/20"
             >
-              <div className="flex aspect-video items-center justify-center rounded-t-lg bg-gray-900">
+              <div className="flex aspect-video items-center justify-center bg-black/40">
                 <div className="text-center">
-                  <span className="mb-2 inline-block rounded-full bg-red-600 px-3 py-1 text-sm font-bold text-white">
-                    EN DIRECTO
+                  <span className="mb-3 inline-block rounded-full bg-red-500 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-white">
+                    En directo
                   </span>
-                  <p className="text-white/70">Pulsa para ver</p>
+                  <p className="text-sm text-white/50">Pulsa para ver</p>
                 </div>
               </div>
-              <div className="p-4">
-                <h3 className="font-semibold group-hover:text-green-700">
+              <div className="p-5">
+                <h3 className="font-bold uppercase tracking-wide text-white group-hover:text-cyan-light">
                   {stream.title || "Retransmision en vivo"}
                 </h3>
                 {stream.match && (
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-2 text-sm text-white/50">
                     {stream.match.homeTeam?.player1.name.split(" ")[0]} / {stream.match.homeTeam?.player2.name.split(" ")[0]}
                     {" vs "}
                     {stream.match.awayTeam?.player1.name.split(" ")[0]} / {stream.match.awayTeam?.player2.name.split(" ")[0]}
