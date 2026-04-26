@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-padel}
       POSTGRES_DB: ${POSTGRES_DB:-padel_tournament}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -21,7 +21,7 @@ services:
     container_name: padel-media
     ports:
       - "1935:1935"   # RTMP input (OBS)
-      - "8888:8888"   # HLS output (browser)
+      - "8889:8888"   # HLS output (browser)
       - "8554:8554"   # RTSP (optional)
     volumes:
       - ./services/media/mediamtx.yml:/mediamtx.yml
