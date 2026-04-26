@@ -1,236 +1,252 @@
 # CLAUDE.md - Plataforma Torneos de Padel
 
-## Descripcion del Proyecto
+## REGLAS CRITICAS — LEER ANTES DE HACER NADA
 
-Plataforma web completa para gestion de torneos de padel. Dos audiencias:
-- **Jugadores**: inscripcion, consultar cuadros/grupos, ver partidos en directo
-- **Organizadores**: gestion completa del torneo, generacion de grupos con IA/OR-Tools, resultados en vivo
+### NUNCA hagas esto (sin importar lo que te pidan)
+- **NUNCA** modifiques archivos en `apps/api/` — el backend lo gestiona Daniel
+- **NUNCA** modifiques `packages/db/prisma/schema.prisma` — la base de datos la gestiona Daniel
+- **NUNCA** modifiques `packages/shared/` — los schemas de validacion los gestiona Daniel
+- **NUNCA** modifiques `docker-compose.yml`, `.env`, ni nada relacionado con configuracion de servidores
+- **NUNCA** modifiques `apps/api/src/trpc/`, `apps/api/src/routers/` ni ningun archivo del backend
+- **NUNCA** cambies contraseñas, JWT_SECRET, DATABASE_URL ni ninguna credencial
+- **NUNCA** ejecutes `prisma migrate`, `prisma db push` ni modifiques la base de datos
+- **NUNCA** instales dependencias nuevas (`npm install ...`) sin aprobacion explicita de Daniel
+- **NUNCA** borres archivos existentes
+- **NUNCA** cambies puertos, URLs de API, ni configuraciones de conexion
+- **NUNCA** toques los archivos `trpc.ts`, `trpc-provider.tsx` ni `auth.ts` — son la conexion al backend
 
-## Arquitectura
+### Lo que SI puedes hacer
+- Modificar paginas en `apps/web/src/app/` — es el frontend publico (lo que ven los jugadores)
+- Modificar paginas en `apps/admin/src/app/` — es el panel de administracion
+- Crear componentes nuevos en `apps/web/src/components/` o `apps/admin/src/components/`
+- Modificar estilos (clases de Tailwind CSS en los archivos .tsx)
+- Modificar textos, labels, mensajes que se muestran al usuario
+- Crear nuevas paginas dentro de las rutas existentes
 
-Monorepo Turborepo con **dos frontends + backend comun + microservicio Python**.
+---
+
+## Que es este proyecto
+
+Plataforma web para gestionar torneos de padel. Tiene dos partes:
+- **Web publica** (`apps/web/`) — lo que ven los jugadores: torneos, inscripcion, grupos, resultados, streaming
+- **Panel admin** (`apps/admin/`) — lo que usan los organizadores: crear torneos, gestionar inscripciones, meter resultados
+
+Ambas partes hablan con una API comun (`apps/api/`) que se conecta a una base de datos PostgreSQL.
+
+## Estructura del proyecto
 
 ```
 padel-tournament/
 ├── apps/
-│   ├── web/                # Next.js 15 — Web publica (puerto 3000)
-│   ├── admin/              # Next.js 15 — Panel admin (puerto 3002)
-│   └── api/                # Hono + tRPC — Backend API (puerto 3001)
+│   ├── web/                # PUEDES TOCAR — Web publica (puerto 3003)
+│   │   └── src/app/        # ← Aqui estan las paginas
+│   ├── admin/              # PUEDES TOCAR — Panel admin (puerto 3002)
+│   │   └── src/app/        # ← Aqui estan las paginas
+│   └── api/                # NO TOCAR — Backend API (puerto 3001)
 ├── packages/
-│   ├── db/                 # Prisma schema + client + migrations
-│   └── shared/             # Types TypeScript + validaciones Zod
+│   ├── db/                 # NO TOCAR — Base de datos
+│   └── shared/             # NO TOCAR — Validaciones compartidas
 ├── services/
-│   ├── optimizer/          # Python + FastAPI + OR-Tools (puerto 8000)
-│   └── media/              # MediaMTX config (RTMP 1935, HLS 8888)
-├── docker-compose.yml      # PostgreSQL, MediaMTX, optimizer
-├── turbo.json
-├── package.json
-└── .env
+│   ├── optimizer/          # NO TOCAR — Python OR-Tools
+│   └── media/              # NO TOCAR — Streaming config
+├── docs/                   # Documentacion tecnica
+├── logs/                   # Logs de sesiones
+├── docker-compose.yml      # NO TOCAR
+└── .env                    # NO TOCAR
 ```
 
-## Stack Tecnologico
+## Puertos (ya configurados, NO cambiar)
 
-| Componente | Tecnologia |
-|-----------|-----------|
-| Monorepo | Turborepo |
-| Frontends | Next.js 15 (App Router) + Tailwind CSS + shadcn/ui |
-| Backend API | Hono + tRPC (type-safe end-to-end) |
-| ORM | Prisma |
-| Base de datos | PostgreSQL 16 |
-| Auth admin | JWT simple (jose) |
-| Tiempo real | Server-Sent Events (SSE) |
-| Optimizer | Python 3.12 + FastAPI + OR-Tools |
-| Streaming | MediaMTX (RTMP → HLS) + hls.js |
-| Deploy | Docker Compose + Cloudflare Tunnel |
+| Servicio | Puerto | URL |
+|----------|--------|-----|
+| Web publica | 3003 | http://localhost:3003 |
+| Panel admin | 3002 | http://localhost:3002 |
+| API backend | 3001 | http://localhost:3001 |
+| PostgreSQL | 5433 | (solo uso interno) |
+| MediaMTX HLS | 8889 | http://localhost:8889 |
+| MediaMTX RTMP | 1935 | rtmp://localhost:1935 |
 
-## Comandos Principales
+## Como arrancar la app
 
 ```bash
-# Desarrollo
-npm run dev              # Arranca todo (turbo dev)
-npm run dev --filter=web # Solo web publica
-npm run dev --filter=admin # Solo admin
-npm run dev --filter=api # Solo API
+# 1. Levantar base de datos y streaming (Docker debe estar abierto)
+cd ~/projects/padel-tournament && docker compose up -d
 
-# Base de datos
-cd packages/db && npx prisma migrate dev    # Crear/aplicar migracion
-cd packages/db && npx prisma studio         # UI visual de la BD
-cd packages/db && npx prisma generate       # Regenerar client
+# 2. Arrancar la API
+DATABASE_URL="postgresql://padel:padel@127.0.0.1:5433/padel_tournament" npx tsx apps/api/src/index.ts &
 
-# Docker (PostgreSQL + MediaMTX)
-docker compose up -d        # Levantar servicios
-docker compose down         # Parar servicios
-docker compose logs -f      # Ver logs
+# 3. Arrancar web publica
+cd apps/web && npm run dev &
 
-# Build
-npm run build               # Build de todo
-npm run lint                # Lint de todo
-npm run typecheck           # Type checking
+# 4. Arrancar panel admin
+cd apps/admin && npm run dev &
 ```
 
-## Convenciones de Codigo
+Credenciales admin: `admin@padel.local` / `admin123`
 
-### General
-- **Idioma de comunicacion**: Espanol
-- **Idioma de codigo**: Ingles (variables, funciones, comentarios en codigo)
-- **TypeScript strict** en todo el proyecto
-- **Imports**: Usar path aliases (`@/` para cada app, `@padel/db`, `@padel/shared`)
+## Idioma
 
-### API (apps/api)
-- Routers tRPC organizados por dominio: `tournament.router.ts`, `player.router.ts`, etc.
-- Validacion con Zod en todos los inputs (schemas en `packages/shared`)
-- Errores tipados con TRPCError
+- **Comunicacion**: siempre en espanol
+- **Codigo**: en ingles (variables, funciones, nombres de archivo)
+- **Textos visibles al usuario** (labels, botones, mensajes): en espanol
 
-### Frontends (apps/web y apps/admin)
-- App Router de Next.js (carpeta `app/`)
-- Server Components por defecto, `"use client"` solo cuando sea necesario
-- Componentes shadcn/ui en `components/ui/`
-- Componentes de negocio en `components/`
-- Estilos: solo Tailwind CSS, no CSS custom
+## Tecnologias (para que sepas que se usa, NO para cambiarlas)
 
-### Base de Datos
-- UUIDs como primary keys
-- Timestamps `created_at` y `updated_at` en todas las tablas
-- Enums para estados: `TournamentStatus`, `MatchStatus`, `RegistrationStatus`, etc.
-- Relaciones explicitas con `onDelete` definido
+- **React + Next.js 15**: framework del frontend (App Router, carpeta `app/`)
+- **Tailwind CSS**: estilos mediante clases en el HTML (no se usa CSS normal)
+- **tRPC**: conexion tipada con la API (los hooks `trpc.xxx.useQuery()` y `trpc.xxx.useMutation()`)
+- **TypeScript**: todo el codigo es TypeScript (.tsx para componentes, .ts para logica)
 
-## Esquema de Base de Datos (tablas principales)
+## Como funcionan las paginas
 
-- `admins` — Usuarios administradores
-- `tournaments` — Torneos (con status: draft/open/closed/in_progress/finished)
-- `categories` — Categorias por torneo (masculina, femenina, mixta...)
-- `players` — Jugadores registrados
-- `teams` — Parejas (2 jugadores)
-- `registrations` — Inscripciones de equipos a torneos
-- `groups` — Grupos dentro de fase de grupos
-- `group_standings` — Clasificacion de cada equipo en su grupo
-- `matches` — Partidos (fase grupos y eliminatoria)
-- `match_sets` — Sets de cada partido
-- `courts` — Pistas disponibles
-- `streams` — Streams de video activos
-
-## Flujo del Torneo
-
-1. Admin crea torneo → `draft`
-2. Admin configura categorias, pistas, parametros
-3. Admin abre inscripciones → `open`
-4. Jugadores se inscriben (datos + pareja + categoria)
-5. Admin confirma inscripciones (pago externo: Bizum/efectivo/transferencia)
-6. Admin cierra inscripciones → `closed`
-7. Admin genera grupos con OR-Tools (equilibrados por nivel)
-8. OR-Tools genera calendario de partidos
-9. Torneo comienza → `in_progress`
-10. Admin registra resultados → clasificaciones se actualizan via SSE
-11. Fase de grupos termina → se genera bracket eliminatorio automaticamente
-12. Eliminatorias con bracket actualizado en tiempo real
-13. Torneo finaliza → `finished`
-
-## Streaming
+Cada pagina es un archivo `page.tsx` dentro de una carpeta en `app/`. La ruta de la URL viene de la estructura de carpetas:
 
 ```
-OBS → RTMP (:1935) → MediaMTX → HLS (:8888) → hls.js (navegador)
+apps/web/src/app/page.tsx                          →  /
+apps/web/src/app/torneo/[slug]/page.tsx            →  /torneo/mi-torneo
+apps/web/src/app/torneo/[slug]/inscripcion/page.tsx →  /torneo/mi-torneo/inscripcion
 ```
-- Cada stream tiene un `stream_key` unico
-- OBS publica a `rtmp://servidor:1935/{stream_key}`
-- Frontend consume `http://servidor:8888/{stream_key}/index.m3u8`
 
-## Rutas Web Publica
+### Paginas que ya existen
 
-| Ruta | Contenido |
-|------|-----------|
-| `/` | Landing con torneos activos |
-| `/torneo/[slug]` | Detalle torneo |
-| `/torneo/[slug]/inscripcion` | Formulario inscripcion |
-| `/torneo/[slug]/grupos` | Grupos y clasificaciones |
-| `/torneo/[slug]/cuadro` | Bracket eliminatorio |
-| `/torneo/[slug]/partidos` | Lista de partidos |
-| `/torneo/[slug]/directo` | Streams en vivo |
+**Web publica (`apps/web/src/app/`):**
+| Archivo | URL | Que hace |
+|---------|-----|----------|
+| `page.tsx` | `/` | Landing con lista de torneos |
+| `torneo/[slug]/page.tsx` | `/torneo/xxx` | Detalle de un torneo |
+| `torneo/[slug]/inscripcion/page.tsx` | `/torneo/xxx/inscripcion` | Formulario de inscripcion |
+| `torneo/[slug]/estado/page.tsx` | `/torneo/xxx/estado` | Consultar estado inscripcion |
 
-## Rutas Panel Admin
+**Panel admin (`apps/admin/src/app/`):**
+| Archivo | URL | Que hace |
+|---------|-----|----------|
+| `page.tsx` | `/` | Redirige a login o dashboard |
+| `login/page.tsx` | `/login` | Login de admin |
+| `dashboard/page.tsx` | `/dashboard` | Lista de torneos |
+| `torneos/nuevo/page.tsx` | `/torneos/nuevo` | Crear torneo |
+| `torneos/[id]/page.tsx` | `/torneos/xxx` | Gestionar torneo (4 tabs) |
 
-| Ruta | Contenido |
-|------|-----------|
-| `/login` | Login administrador |
-| `/dashboard` | Resumen torneos |
-| `/torneos` | Lista torneos |
-| `/torneos/nuevo` | Crear torneo |
-| `/torneos/[id]/*` | Gestion torneo (inscripciones, grupos, calendario, resultados, bracket, streaming) |
-| `/configuracion` | Gestion de admins |
+## Como usar los datos de la API
 
-## Instrucciones para Claude
+Los datos se obtienen con hooks de tRPC. NUNCA llames a fetch() o axios directamente. Usa siempre los hooks existentes:
 
-### Antes de cualquier cambio
-1. Leer los archivos afectados antes de modificarlos
-2. Respetar los patrones existentes en el codigo
-3. No hacer cambios sin aprobacion explicita de Daniel
+```tsx
+// Leer datos (GET)
+const { data, isLoading } = trpc.tournament.list.useQuery();
+const { data } = trpc.tournament.bySlug.useQuery({ slug: "mi-torneo" });
 
-### Documentacion obligatoria
-Toda sesion de trabajo DEBE generar documentacion sin que el usuario lo pida:
+// Enviar datos (POST/PUT)
+const mutation = trpc.tournament.create.useMutation({
+  onSuccess: () => { /* que hacer cuando funciona */ },
+  onError: (err) => { /* que hacer si falla */ },
+});
+mutation.mutate({ name: "Mi Torneo", ... });
+```
 
-#### 1. Documentacion tecnica (`docs/`)
-Registrar en `docs/` lo implementado:
+### Endpoints disponibles (solo lectura — para saber que datos puedes pedir)
+
+**Publicos (no necesitan login):**
+- `trpc.tournament.list` — Lista de torneos visibles
+- `trpc.tournament.bySlug` — Un torneo por su slug
+- `trpc.registration.register` — Inscribir un equipo
+- `trpc.registration.checkStatus` — Consultar inscripcion por email
+
+**Admin (necesitan estar logueado):**
+- `trpc.auth.login` / `trpc.auth.me`
+- `trpc.tournament.adminList` / `trpc.tournament.byId`
+- `trpc.tournament.create` / `trpc.tournament.update`
+- `trpc.tournament.addCategory` / `trpc.tournament.deleteCategory`
+- `trpc.tournament.addCourt` / `trpc.tournament.deleteCourt`
+- `trpc.registration.listByTournament` / `trpc.registration.confirm` / `trpc.registration.cancel`
+
+Si necesitas un endpoint que no existe, **no lo crees**. Dile a Daniel que lo necesitas.
+
+## Patrones que DEBES seguir
+
+### Toda pagina nueva debe tener esta estructura basica
+```tsx
+"use client";
+
+import { trpc } from "@/lib/trpc";
+
+export default function MiPagina() {
+  // datos
+  const { data, isLoading } = trpc.algo.useQuery();
+
+  if (isLoading) return <p className="text-gray-500">Cargando...</p>;
+
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-8">
+      {/* contenido */}
+    </div>
+  );
+}
+```
+
+### Estilos: solo clases de Tailwind
+```tsx
+// CORRECTO
+<button className="rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700">
+  Guardar
+</button>
+
+// INCORRECTO — no uses style={{}} ni CSS custom
+<button style={{ backgroundColor: 'green' }}>Guardar</button>
+```
+
+### Colores del proyecto
+- **Verde** (`green-600`, `green-700`): acciones principales, botones, links activos
+- **Rojo** (`red-500`, `red-600`): eliminar, cancelar, errores
+- **Amarillo** (`yellow-100`, `yellow-700`): pendiente, en curso
+- **Azul** (`blue-100`, `blue-700`): finalizado, info
+- **Gris** (`gray-50` a `gray-600`): fondos, bordes, texto secundario
+
+### Si te piden algo que no sabes hacer
+- NO inventes soluciones
+- NO crees endpoints de API nuevos
+- NO modifiques la estructura de datos
+- Responde: "Esto requiere cambios en el backend/API. Daniel tiene que hacerlo."
+
+## Flujo del torneo (para entender la logica)
+
+1. Admin crea torneo → estado `DRAFT`
+2. Admin configura categorias y pistas
+3. Admin abre inscripciones → estado `OPEN` (aparece en la web publica)
+4. Jugadores se inscriben desde la web publica
+5. Admin confirma inscripciones (marca pago recibido)
+6. Admin cierra inscripciones → estado `CLOSED`
+7. Se generan los grupos (OR-Tools) — **lo hace Daniel**
+8. Torneo empieza → estado `IN_PROGRESS`
+9. Admin mete resultados de partidos
+10. Se genera cuadro eliminatorio automaticamente
+11. Torneo termina → estado `FINISHED`
+
+## Documentacion obligatoria
+
+Toda sesion de trabajo DEBE generar documentacion automaticamente:
+
+### 1. Documentacion tecnica en `docs/`
 - Que se ha cambiado y por que
-- Decisiones tecnicas (alternativas consideradas)
 - Nuevas funcionalidades (que hacen, como se usan)
-- Configuraciones nuevas o modificadas
-- Dependencias anadidas
-- Problemas encontrados y resolucion
-- Arquitectura y flujos si cambian
 
-#### 2. Logs de acciones (`logs/`)
-Registro cronologico en `logs/` de cada sesion:
+### 2. Logs en `logs/`
 - Fecha y hora
-- Archivos creados, modificados o eliminados
-- Comandos ejecutados relevantes
-- Errores encontrados y resolucion
+- Archivos creados o modificados
+- Errores encontrados y como se resolvieron
 - Estado final (que funciona, que queda pendiente)
 
-### Al crear nuevas rutas API (tRPC)
-1. Definir schema Zod de input/output en `packages/shared`
-2. Crear el router en `apps/api/src/routers/`
-3. Registrar en el appRouter principal
-4. El frontend consume via el client tRPC tipado
+## Resolucion de problemas comunes
 
-### Al crear nuevas paginas
-1. Crear la ruta en `app/` del frontend correspondiente
-2. Server Component por defecto
-3. Usar componentes shadcn/ui existentes
-4. Responsive desde el inicio (mobile-first)
+### "No se muestran los datos" o "Cargando..." infinito
+- Verifica que la API esta corriendo: `curl http://localhost:3001/health`
+- Verifica que Docker esta corriendo: `docker compose ps`
+- El endpoint tRPC que usas puede no existir — revisa la seccion de endpoints disponibles
 
-### Al modificar la base de datos
-1. Editar `packages/db/prisma/schema.prisma`
-2. Ejecutar `npx prisma migrate dev --name descripcion_cambio`
-3. Ejecutar `npx prisma generate`
-4. Actualizar types en `packages/shared` si es necesario
+### Error de TypeScript
+- NO ignores errores con `@ts-ignore` o `as any`
+- Lee el error, normalmente dice que propiedad falta o sobra
+- Si no lo entiendes, pregunta a Daniel
 
-### Al trabajar con el optimizer (Python)
-1. El microservicio esta en `services/optimizer/`
-2. Usa FastAPI + OR-Tools
-3. Se comunica con la API Node via HTTP interno (puerto 8000)
-4. Probar con `curl` antes de integrar
-
-### Deploy
-- Todo corre en Docker Compose
-- Cloudflare Tunnel expone web publica y admin
-- Variables de entorno en `.env` (nunca commitear secretos)
-
-## Variables de Entorno (.env)
-
-```env
-# PostgreSQL
-DATABASE_URL=postgresql://padel:padel@localhost:5432/padel_tournament
-POSTGRES_USER=padel
-POSTGRES_PASSWORD=padel
-POSTGRES_DB=padel_tournament
-
-# API
-API_PORT=3001
-JWT_SECRET=cambiar-en-produccion
-
-# Apps
-NEXT_PUBLIC_API_URL=http://localhost:3001
-NEXT_PUBLIC_STREAM_URL=http://localhost:8888
-
-# Optimizer
-OPTIMIZER_URL=http://localhost:8000
-```
+### Error de Tailwind / estilos no se aplican
+- Asegurate de que el archivo `globals.css` tiene `@import "tailwindcss";`
+- Las clases de Tailwind van en `className`, no en `class`
