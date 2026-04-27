@@ -70,7 +70,15 @@ export const tournamentRouter = router({
     .mutation(async ({ ctx, input }) => {
       const slug = slugify(input.name) + "-" + Date.now().toString(36);
       return ctx.prisma.tournament.create({
-        data: { ...input, slug },
+        data: {
+          ...input,
+          slug,
+          dateStart: new Date(input.dateStart),
+          dateEnd: new Date(input.dateEnd),
+          registrationDeadline: input.registrationDeadline
+            ? new Date(input.registrationDeadline)
+            : undefined,
+        },
       });
     }),
 
@@ -81,7 +89,14 @@ export const tournamentRouter = router({
       const { id, ...data } = input;
       return ctx.prisma.tournament.update({
         where: { id },
-        data,
+        data: {
+          ...data,
+          ...(data.dateStart && { dateStart: new Date(data.dateStart) }),
+          ...(data.dateEnd && { dateEnd: new Date(data.dateEnd) }),
+          ...(data.registrationDeadline && {
+            registrationDeadline: new Date(data.registrationDeadline),
+          }),
+        },
       });
     }),
 

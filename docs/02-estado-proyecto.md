@@ -1,4 +1,4 @@
-# Estado del Proyecto — 2026-04-26
+# Estado del Proyecto — 2026-04-27
 
 ## Resumen
 
@@ -64,13 +64,28 @@ Plataforma de gestion de torneos de padel. Monorepo Turborepo con dos frontends 
 - Player HLS con hls.js + fallback nativo Safari (`/torneo/[slug]/directo/[key]`)
 - Badge "EN DIRECTO" en partidos con stream activo
 
-### Fase 8 — Polish
+### Fase 8 — Polish + Rediseño UI
+- Rediseño completo de la web publica al estilo Open Padel Almansa:
+  - Fondo degradado navy → azul → cyan (fixed attachment)
+  - Tipografia Poppins (black/900, uppercase)
+  - Cards glassmorphism (bg-white/10 + backdrop-blur)
+  - Botones negros con hover cyan
+  - Border-radius 22px en tarjetas
 - SEO meta tags (Open Graph, robots, theme-color)
 - Viewport responsivo configurado
 - Footer en web publica
 - Admin panel con robots noindex/nofollow
-- Enlace a "En Directo" desde la pagina del torneo
 - CLAUDE.md actualizado con todos los endpoints y paginas
+
+### Bugfixes
+- Fix: Prisma DateTime — dateStart/dateEnd se convierten a Date() antes de crear/actualizar torneos
+- Fix: group.generate fallback — si el optimizer Python no esta disponible, genera grupos con round-robin por nivel
+- Fix: validacion numGroups adaptada para multi-categoria (1 grupo tambien es valido)
+
+### Datos de prueba
+- Script `scripts/seed-open-estrella.ts` para cargar datos del Open Estrella Galicia
+- 5 categorias: 1ª Masc (12 equipos), 2ª Masc (24), 3ª Masc (24), Mixto (9), Femenino (4)
+- 73 equipos, 146 jugadores cargados con inscripcion confirmada
 
 ## Pendiente / Mejoras futuras
 

@@ -30,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className="min-h-screen text-white antialiased" style={{
-        background: "linear-gradient(180deg, rgba(0,36,58,0.95) 0%, #0693e3 16%, #8ed1fc 58%, #ffffff 100%)",
+        background: "linear-gradient(180deg, #00243a 0%, #003d5c 20%, #045a8d 45%, #0693e3 75%, #f0f4f8 100%)",
         backgroundAttachment: "fixed",
       }}>
         <TRPCProvider>

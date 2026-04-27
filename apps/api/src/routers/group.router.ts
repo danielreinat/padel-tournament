@@ -49,10 +49,10 @@ export const groupRouter = router({
       }
 
       const confirmedTeams = tournament.registrations.map((r) => r.team);
-      if (confirmedTeams.length < tournament.numGroups * 2) {
+      if (confirmedTeams.length < 2) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: `Necesitas al menos ${tournament.numGroups * 2} equipos confirmados (tienes ${confirmedTeams.length})`,
+          message: `Necesitas al menos 2 equipos confirmados (tienes ${confirmedTeams.length})`,
         });
       }
 
@@ -74,11 +74,11 @@ export const groupRouter = router({
       const allGroups = [];
 
       for (const [categoryId, teams] of teamsByCategory) {
-        const numGroups = Math.min(tournament.numGroups, Math.floor(teams.length / 2));
-        if (numGroups < 2) continue;
+        const teamsPerGroup = tournament.teamsPerGroup || 3;
+        const numGroups = Math.max(1, Math.ceil(teams.length / teamsPerGroup));
 
-        // Call optimizer
-        let groupAssignments;
+        // Try optimizer first, fallback to round-robin
+        let groupAssignments: { groups: { group_name: string; team_ids: string[] }[] };
         try {
           const res = await fetch(`${OPTIMIZER_URL}/generate-groups`, {
             method: "POST",
@@ -90,11 +90,22 @@ export const groupRouter = router({
           });
           if (!res.ok) throw new Error(await res.text());
           groupAssignments = await res.json();
-        } catch (e) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: `Error del optimizer: ${e instanceof Error ? e.message : "desconocido"}`,
-          });
+        } catch {
+          // Fallback: simple round-robin distribution sorted by level
+          const sorted = [...teams].sort((a, b) => b.avgLevel - a.avgLevel);
+          const groupBuckets: string[][] = Array.from({ length: numGroups }, () => []);
+          sorted.forEach((t, i) => groupBuckets[i % numGroups].push(t.id));
+
+          const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+          groupAssignments = {
+            groups: groupBuckets
+              .filter((b) => b.length > 0)
+              .map((teamIds, i) => ({
+                group_name: letters[i] || `G${i + 1}`,
+                team_ids: teamIds,
+              })),
+          };
+          console.log(`Optimizer no disponible para categoría ${categoryId}, usando fallback round-robin (${groupAssignments.groups.length} grupos)`);
         }
 
         // Create groups and standings
